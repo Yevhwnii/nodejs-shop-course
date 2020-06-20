@@ -9,6 +9,7 @@ const products = [];
 // /admin/add-product => GET
 router.get('/add-product', (req, res, next) => {
   res.render('add-product', {
+    // Passing additional data to the templating engine
     pageTitle: 'Add new product',
     path: '/admin/add-product',
   });
