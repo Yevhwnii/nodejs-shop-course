@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/', (req, res, next) => {
   const products = adminData.products;
 
-  res.render('shop', { prods: products, docTitle: 'Shop' }); // we don`t need to define path to views folder since we did it globally in app.js
+  res.render('shop', { prods: products, pageTitle: 'Shop', path: '/' }); // we don`t need to define path to views folder since we did it globally in app.js
 });
 
 module.exports = router;
