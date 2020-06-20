@@ -8,13 +8,18 @@ const getProductsFromFile = (callback) => {
     if (err) {
       return callback([]);
     }
+    console.log(err);
+
     callback(JSON.parse(fileContent));
   });
 };
 
 module.exports = class Product {
-  constructor(title) {
+  constructor(title, imageUrl, description, price) {
     this.title = title;
+    this.imageUrl = imageUrl;
+    this.description = description;
+    this.price = price;
   }
 
   save() {
