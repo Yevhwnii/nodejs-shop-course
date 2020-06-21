@@ -21,6 +21,8 @@ module.exports = class Product {
   }
 
   save() {
+    // apply id to the product so we can target it later (used in view on button click)
+    this.id = Math.random().toString();
     getProductsFromFile((products) => {
       products.push(this);
       fs.writeFile(p, JSON.stringify(products), (err) => {
@@ -31,5 +33,14 @@ module.exports = class Product {
 
   static fetchAllProducts(callback) {
     getProductsFromFile(callback);
+  }
+
+  static findById(id, callback) {
+    getProductsFromFile((products) => {
+      const product = products.find((product) => {
+        return product.id === id;
+      });
+      callback(product);
+    });
   }
 };

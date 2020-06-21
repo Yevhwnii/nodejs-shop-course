@@ -20,6 +20,18 @@ exports.getProducts = (req, res, next) => {
   });
 };
 
+exports.getProduct = (req, res, next) => {
+  // params object gives access to query params by express
+  const prodId = req.params.productId;
+  Product.findById(prodId, (product) => {
+    res.render('shop/product-detail', {
+      pageTitle: product.title,
+      path: '/products',
+      product: product,
+    });
+  });
+};
+
 exports.getCart = (req, res, next) => {
   res.render('shop/cart', {
     path: '/cart',
