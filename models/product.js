@@ -8,8 +8,6 @@ const getProductsFromFile = (callback) => {
     if (err) {
       return callback([]);
     }
-    console.log(err);
-
     callback(JSON.parse(fileContent));
   });
 };
