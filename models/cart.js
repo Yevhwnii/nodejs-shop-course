@@ -3,6 +3,8 @@ const path = require('path');
 
 const p = path.join(__dirname, '../', 'data', 'cart.json');
 
+// This class is responsive for Cart
+// At the moment there is file which holds cart item called cart.json
 module.exports = class Cart {
   static addProduct(id, productPrice) {
     // Fetch previous cart => either add new product or increase quanity
@@ -31,6 +33,25 @@ module.exports = class Cart {
       }
       cart.totalPrice = cart.totalPrice + +productPrice;
       fs.writeFile(p, JSON.stringify(cart), (err) => {
+        console.log(err);
+      });
+    });
+  }
+
+  static deleteProduct(id, price) {
+    fs.readFile(p, (err, fileContent) => {
+      if (err) {
+        return;
+      }
+      const updatedCart = { ...JSON.parse(fileContent) };
+      const product = updatedCart.products.find((prod) => prod.id === id);
+      const productQuantity = product.quantity;
+      updatedCart.products = updatedCart.products.filter(
+        (prod) => prod.id !== id
+      );
+
+      updatedCart.totalPrice -= price * productQuantity;
+      fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
         console.log(err);
       });
     });
