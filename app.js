@@ -13,8 +13,6 @@ app.set('views', 'views');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
-db.execute(`SELECT * FROM products`).then();
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -24,3 +22,5 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 app.listen(3000);
+
+// Promises are callback which were used with file interaction but written in way more elegant way, btw
