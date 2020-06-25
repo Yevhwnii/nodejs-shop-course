@@ -11,7 +11,14 @@ module.exports = class Product {
     this.price = price;
   }
 
-  save() {}
+  save() {
+    return db.execute(
+      'INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)',
+      [this.title, this.price, this.imageUrl, this.description]
+    );
+    // using ? mark we add security layer so that user cannot insert sql command in our database
+    // mysql checks syntax of this query, inserts our data and removes sql command
+  }
 
   static fetchAllProducts() {
     return db.execute('SELECT * FROM products');
