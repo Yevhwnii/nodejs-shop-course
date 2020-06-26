@@ -21,6 +21,13 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-app.listen(3000);
+// Look at all the models, create tables based on them or relations
+db.sync()
+  .then((res) => {
+    app.listen(3000);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 // Promises are callback which were used with file interaction but written in way more elegant way, btw
