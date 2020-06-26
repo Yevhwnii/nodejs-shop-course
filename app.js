@@ -6,6 +6,8 @@ const errorController = require('./controllers/error');
 const db = require('./util/database');
 const Product = require('./models/product');
 const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
 
 const app = express();
 
@@ -33,11 +35,18 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 // ASSOCIATIONS
-Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' }); // user created many products
+// User (admin) may create many products
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasMany(Product); // reverse same relations as above
+// One user has one cart, one cart has one user
+User.hasOne(Cart);
+Cart.belongsTo(User);
+// Cart may have many products, product may be part of many carts
+Cart.belongsToMany(Product, { through: CartItem }); // define where those connections should be stored
+Product.belongsToMany(Cart, { through: CartItem });
 
 // Look at all the models, create tables based on them or relations
-db.sync() // overwrite tables - force: true , argument
+db.sync({}) // overwrite tables - force: true , argument
   .then(() => {
     return User.findByPk(1);
   })
@@ -46,6 +55,9 @@ db.sync() // overwrite tables - force: true , argument
       return User.create({ name: 'Breiter', email: 'test@test.com' });
     }
     return Promise.resolve(user);
+  })
+  .then((user) => {
+    return user.createCart();
   })
   .then(() => {
     app.listen(3000);
