@@ -1,73 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+const Sequelize = require('sequelize');
 
-const p = path.join(__dirname, '../', 'data', 'cart.json');
+const db = require('../util/database');
 
-// This class is responsive for Cart
-// At the moment there is file which holds cart item called cart.json
-module.exports = class Cart {
-  static addProduct(id, productPrice) {
-    // Fetch previous cart => either add new product or increase quanity
-    fs.readFile(p, (err, fileContent) => {
-      let cart = { products: [], totalPrice: 0 };
-      if (!err) {
-        cart = JSON.parse(fileContent);
-      }
-      //analyze => find existing product
-      const existingProductIndex = cart.products.findIndex(
-        (prod) => prod.id === id
-      );
-      const existingProduct = cart.products[existingProductIndex];
-      let updatedProduct;
-      if (existingProduct) {
-        updatedProduct = { ...existingProduct };
-        updatedProduct.quantity = updatedProduct.quantity + 1;
-        cart.products = [...cart.products];
-        cart.products[existingProductIndex] = updatedProduct;
-      } else {
-        updatedProduct = {
-          id: id,
-          quantity: 1,
-        };
-        cart.products = [...cart.products, updatedProduct];
-      }
-      cart.totalPrice = cart.totalPrice + +productPrice;
-      fs.writeFile(p, JSON.stringify(cart), (err) => {
-        console.log(err);
-      });
-    });
-  }
+const Cart = db.define('carts', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+});
 
-  static deleteProduct(id, price) {
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        return;
-      }
-      const updatedCart = { ...JSON.parse(fileContent) };
-      const product = updatedCart.products.find((prod) => prod.id === id);
-      if (!product) {
-        return;
-      }
-      const productQuantity = product.quantity;
-      updatedCart.products = updatedCart.products.filter(
-        (prod) => prod.id !== id
-      );
+module.exports = Cart;
 
-      updatedCart.totalPrice -= price * productQuantity;
-      fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
-        console.log(err);
-      });
-    });
-  }
+// A cart should belong to one user but should also hold many products.
+// That is why, cart tables should hold different cart for different users
 
-  static getCart(callback) {
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        callback(null);
-      } else {
-        const cart = JSON.parse(fileContent);
-        callback(cart);
-      }
-    });
-  }
-};
+// While cart should hold cart items which contains products
