@@ -49,27 +49,21 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  Cart.getCart((cart) => {
-    Product.fetchAllProducts((products) => {
-      const cartProducts = [];
-      for (product of products) {
-        const cartProductData = cart.products.find(
-          (prod) => prod.id === product.id
-        );
-        if (cartProductData) {
-          cartProducts.push({
-            productData: product,
-            qty: cartProductData.quantity,
+  req.user
+    .getCart()
+    .then((cart) => {
+      return cart
+        .getProducts() // return products of the cart since it is associated with products (through argument)
+        .then((products) => {
+          res.render('/shop/cart', {
+            path: '/cart',
+            pageTitle: 'My cart',
+            products,
           });
-        }
-      }
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'My Cart',
-        products: cartProducts,
-      });
-    });
-  });
+        })
+        .catch((err) => console.log(err));
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.postCart = (req, res, next) => {
