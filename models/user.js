@@ -1,5 +1,3 @@
-const { Sequelize } = require('sequelize/types');
-
 // User should: be able to create a unique cart, hold there porducts, which means he has to relate to other tables
 const Sequelize = require('sequelize');
 
