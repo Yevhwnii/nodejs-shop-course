@@ -130,10 +130,17 @@ exports.deleteCartItem = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  res.render('shop/orders', {
-    path: '/orders',
-    pageTitle: 'My Orders',
-  });
+  req.user
+    // Telling to sequelize: if you fetching all the orders, please fetch products with it
+    .getOrders({ include: ['products'] })
+    .then((orders) => {
+      res.render('shop/orders', {
+        path: '/orders',
+        pageTitle: 'My Orders',
+        orders,
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getCheckout = (req, res, next) => {
@@ -143,9 +150,11 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
+  let fetchedCart;
   req.user
     .getCart()
     .then((cart) => {
+      fetchedCart = cart;
       return cart.getProducts();
     })
     .then((products) => {
@@ -158,6 +167,10 @@ exports.postOrder = (req, res, next) => {
         );
         // Since we cant just easily add products to table, we modify each product so it can access quantity later
       });
+    })
+    .then((result) => {
+      // Set table to corresponding value in arguments list
+      return fetchedCart.setProducts(null);
     })
     .then((result) => {
       res.redirect('/orders');
