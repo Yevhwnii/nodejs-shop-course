@@ -8,6 +8,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -38,12 +40,16 @@ app.use(errorController.get404);
 // User (admin) may create many products
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasMany(Product); // reverse same relations as above
-// One user has one cart, one cart has one user
+// One user has one cart, one cart has one user , 1-1
 User.hasOne(Cart);
 Cart.belongsTo(User);
-// Cart may have many products, product may be part of many carts
+// Cart may have many products, product may be part of many carts, m-m
 Cart.belongsToMany(Product, { through: CartItem }); // define where those connections should be stored
 Product.belongsToMany(Cart, { through: CartItem });
+// Single order belongs to one user which created it , 1-m
+Order.belongsTo(User);
+User.hasMany(Order); // One user can have many orders
+Order.belongsToMany(Product, { through: OrderItem });
 
 // Look at all the models, create tables based on them or relations
 db.sync({}) // overwrite tables - force: true , argument
@@ -56,9 +62,9 @@ db.sync({}) // overwrite tables - force: true , argument
     }
     return Promise.resolve(user);
   })
-  .then((user) => {
-    return user.createCart();
-  })
+  // .then((user) => {
+  //   return user.createCart();
+  // })
   .then(() => {
     app.listen(3000);
   })
