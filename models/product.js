@@ -1,31 +1,28 @@
-const Sequelize = require('sequelize');
+const getDb = require('../util/database').getDb;
 
-const db = require('../util/database');
+// Way of creating models through vanila MongoDb connection
+class Product {
+  constructor(title, price, description, imageUrl) {
+    this.title = title;
+    this.price = price;
+    this.description = description;
+    this.imageUrl = imageUrl;
+  }
 
-// This a way you define models using Sequelize, all types are in docs
-const Product = db.define('product', {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  },
-  title: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  price: {
-    type: Sequelize.DOUBLE,
-    allowNull: false,
-  },
-  imageUrl: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  description: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-});
+  save() {
+    const db = getDb();
+    // Telling which collection to use
+    return (
+      db
+        .collection('products') // we return here to make it possible to chain then block
+        // that will make this method return a promise.
+        .insertOne(this)
+        .then((result) => {
+          console.log(result);
+        })
+        .catch((err) => console.log(err))
+    );
+  }
+}
 
 module.exports = Product;
