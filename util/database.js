@@ -1,22 +1,15 @@
-// const mysql = require('mysql2');
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
 
-// // Pool will manage for us creating and closing connection on even multiple queries
-// const pool = mysql.createPool({
-//   host: 'localhost',
-//   user: 'root',
-//   database: 'nodejs_course',
-//   password: 'ichigo32',
-// }); // creating a pool so we don`t have to open and close connection for each query
+const mongoConnect = (callback) => {
+  MongoClient.connect(
+    'mongodb+srv://breiter:qweqwe123123@nodejscourse.o73ks.mongodb.net/<dbname>?retryWrites=true&w=majority'
+  )
+    .then((client) => {
+      console.log('MongoDB is connected!');
+      callback(client);
+    })
+    .catch((err) => console.log(err));
+};
 
-// module.exports = pool.promise(); // allows us to use promises (async code)
-
-////////////////////////////////////////////////////
-
-const Sequelize = require('sequelize');
-
-const sequelize = new Sequelize('nodejs_course', 'root', 'ichigo32', {
-  dialect: 'mysql',
-  host: 'localhost',
-});
-
-module.exports = sequelize;
+module.exports = mongoConnect;
