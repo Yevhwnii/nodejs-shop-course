@@ -13,14 +13,15 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  const product = new Product(
+  const product = new Product({
     title,
     price,
     description,
     imageUrl,
-    null,
-    req.user._id
-  );
+    // Mongose will extract id from user
+    userId: req.user,
+  });
+  // Save method defined by mongoose
   product
     .save()
     .then((result) => {
@@ -56,15 +57,15 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
 
-  const product = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedDesc,
-    updatedImageUrl,
-    prodId
-  );
-  product
-    .save()
+  Product.findById(prodId)
+    .then((product) => {
+      // Moongose gives us back a Mongoose object so we can call all the mongoose method afterwards on it
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDesc;
+      product.imageUrl = updatedImageUrl;
+      return product.save();
+    })
     .then((result) => {
       console.log('Product updated');
       res.redirect('/admin/products');
@@ -73,7 +74,12 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  /*
+    .select('title price -_id') - select which field to query, or even exclude like id here
+    .populate('userId', 'name') - instead of userId there will be object form db, from which we can select name for example
+    It doesn`t return a promise, for it to return a promise we need to call execPopulate()
+   */
+  Product.find()
     .then((products) => {
       res.render('admin/products', {
         prods: products,
@@ -86,7 +92,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteById(prodId)
+  Product.findByIdAndRemove(prodId)
     .then(() => {
       res.redirect('/admin/products');
     })

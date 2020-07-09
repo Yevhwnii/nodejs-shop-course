@@ -1,9 +1,9 @@
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
 const app = express();
@@ -18,9 +18,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.findById('5f0491e4fe2f3514332f64a4')
+  User.findById('5f05eadf0d26d52b6cde0aee')
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id); // adding new field to request which means when req comes here, it assign user to it and passes to other middlewares which then can user it
+      // In request we store mongoose model so we can call all the methods on it
+      req.user = user;
       next();
     })
     .catch((err) => console.log(err));
@@ -31,7 +32,27 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-// Here we create connection to database, and then in the rest of app we have access to it through getDb method
-mongoConnect(() => {
-  app.listen(3000);
-});
+// Way of enabling mongoose
+mongoose
+  .connect(
+    'mongodb+srv://breiter:qweqwe123123@nodejscourse.o73ks.mongodb.net/shop?retryWrites=true&w=majority'
+  )
+  .then((result) => {
+    // Create user only if it is not exists
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: 'Breiter',
+          email: 'test@test.com',
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
+    console.log('MongoDB is connected!');
+    app.listen(3000);
+    console.log('Server is running on 3000 port');
+  })
+  .catch((err) => console.log(err));
