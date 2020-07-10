@@ -2,11 +2,20 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
+const MONGODB_URI =
+  'mongodb+srv://breiter:qweqwe123123@nodejscourse.o73ks.mongodb.net/shop';
+
 const app = express();
+const store = new MongoDBStore({
+  uri: MONGODB_URI,
+  collection: 'sessions',
+});
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -17,11 +26,22 @@ const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  session({
+    secret: 'veryveryverylongstringvalue',
+    resave: false, // save session only if something changed
+    saveUninitialized: false, // no session is saved for request where it doesnt need to be saved
+    cookie: {},
+    store: store,
+  })
+);
 
 app.use((req, res, next) => {
-  User.findById('5f05eadf0d26d52b6cde0aee')
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
     .then((user) => {
-      // In request we store mongoose model so we can call all the methods on it
       req.user = user;
       next();
     })
@@ -36,16 +56,14 @@ app.use(errorController.get404);
 
 // Way of enabling mongoose
 mongoose
-  .connect(
-    'mongodb+srv://breiter:qweqwe123123@nodejscourse.o73ks.mongodb.net/shop?retryWrites=true&w=majority'
-  )
+  .connect(MONGODB_URI)
   .then((result) => {
     // Create user only if it is not exists
     User.findOne().then((user) => {
       if (!user) {
         const user = new User({
-          name: 'Breiter',
-          email: 'test@test.com',
+          name: 'Max',
+          email: 'max@test.com',
           cart: {
             items: [],
           },
