@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
+const flash = require('connect-flash');
 // Local imports
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -45,6 +46,12 @@ app.use(
 // it will be checked behind the scenes and compared.
 // This middleware assigns csrf variable to request and pass it forward
 app.use(csrfProtection);
+
+// Flash messages
+// Allows us to add flash messages in session object as key value pair
+// and afterwards use them, and instantly remove from session object so we don`t have it stored
+// forever (auth.js)
+app.use(flash());
 
 // Extracting user from database, and assigning its data to every request
 app.use((req, res, next) => {
