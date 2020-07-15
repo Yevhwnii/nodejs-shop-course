@@ -58,19 +58,6 @@ app.use(errorController.get404);
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {
-    // Create user only if it is not exists
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: 'Max',
-          email: 'max@test.com',
-          cart: {
-            items: [],
-          },
-        });
-        user.save();
-      }
-    });
     console.log('MongoDB is connected!');
     app.listen(3000);
     console.log('Server is running on 3000 port');
