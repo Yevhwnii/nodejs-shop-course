@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 
@@ -130,5 +132,76 @@ exports.postSignUp = (req, res, next) => {
         });
     })
 
+    .catch((err) => console.log(err));
+};
+
+exports.getReset = (req, res, next) => {
+  let message = req.flash('error');
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render('auth/reset', {
+    path: '/reset',
+    pageTitle: 'Reset Password',
+    errorMessage: message,
+  });
+};
+
+exports.postReset = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/reset');
+    }
+    const token = buffer.toString('hex');
+    User.findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          req.flash('error', 'No account with such email found');
+          return res.redirect('/reset');
+        }
+        // Assign token to the user instance
+        user.resetToken = token;
+        // Date now + 1 hour
+        user.resetTokenExpiration = Date.now() + 3600000;
+        return user.save();
+      })
+      .then((result) => {
+        res.redirect('/');
+        const mailOptions = {
+          from: `Best shop in da world! <${process.env.ACCOUNT_NAME}>`,
+          to: req.body.email,
+          subject: 'Reset your password',
+          html: `
+            <p> You requested password reset </p>
+            <p> Click this <a href="http://localhost:3000/reset/${token}"> link </a> to set a new password </p>
+            `,
+        };
+        transporter.sendMail(mailOptions);
+      })
+      .catch((err) => console.log(err));
+  });
+};
+
+exports.getNewPassword = (req, res, next) => {
+  const token = req.params.token;
+  // If there is a token and token date is greater than now
+  User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+    .then((user) => {
+      let message = req.flash('error');
+      if (message.length > 0) {
+        message = message[0];
+      } else {
+        message = null;
+      }
+      res.render('auth/new-password', {
+        path: '/new-password',
+        pageTitle: 'New Password',
+        errorMessage: message,
+        userId: user._id.toString(),
+      });
+    })
     .catch((err) => console.log(err));
 };
