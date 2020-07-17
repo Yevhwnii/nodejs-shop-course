@@ -1,3 +1,5 @@
+// dotenv config
+require('dotenv').config();
 // 3-rd party imports
 const path = require('path');
 const express = require('express');
@@ -15,11 +17,9 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 // Constants
-const MONGODB_URI =
-  'mongodb+srv://breiter:qweqwe123123@nodejscourse.o73ks.mongodb.net/shop';
 const app = express();
 const store = new MongoDBStore({
-  uri: MONGODB_URI,
+  uri: process.env.MONGO_URI,
   collection: 'sessions',
 });
 const csrfProtection = csrf();
@@ -32,7 +32,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   session({
-    secret: 'veryveryverylongstringvalue',
+    secret: process.env.SECRET_KEY,
     resave: false, // save session only if something changed
     saveUninitialized: false, // no session is saved for request where it doesnt need to be saved
     cookie: {},
@@ -82,7 +82,7 @@ app.use(errorController.get404);
 
 // Enabling mongoose
 mongoose
-  .connect(MONGODB_URI)
+  .connect(process.env.MONGO_URI)
   .then((result) => {
     console.log('MongoDB is connected!');
     app.listen(3000);
