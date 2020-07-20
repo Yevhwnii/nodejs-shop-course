@@ -2,6 +2,7 @@ const crypto = require('crypto');
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const { validationResult } = require('express-validator/check');
 
 require('dotenv').config();
 
@@ -45,6 +46,19 @@ exports.postLogin = (req, res, next) => {
   // even the same user will not be logged in by default when he enters same page from another browser
   const email = req.body.email;
   const password = req.body.password;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render('auth/login', {
+      path: '/login',
+      pageTitle: 'Login',
+      errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email,
+        password,
+      },
+    });
+  }
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
@@ -92,46 +106,62 @@ exports.getSignUp = (req, res, next) => {
     path: '/signup',
     pageTitle: 'Signup',
     errorMessage: message,
+    oldInput: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    validationErrors: [],
   });
 };
 
 exports.postSignUp = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
+  // In auth routes, we added middleware which checks field 'email' is it email and store
+  // result in req body. Then, validationResult is used on req body and extracts errors if there are
+  const errors = validationResult(req);
 
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      if (userDoc) {
-        req.flash('error', 'Email exists already, try different one');
-        return res.redirect('/signup');
-      }
-      // Second argument is salt - number of hash rounds, more rounds - more secure but take more time
-      // This action is not inversible, you cannot deencrypt it.
-      return bcrypt
-        .hash(password, 12)
-        .then((hashedPassword) => {
-          const user = new User({
-            email,
-            password: hashedPassword,
-            cart: { items: [] },
-          });
-          return user.save();
-        })
-        .then((result) => {
-          res.redirect('/login');
-          const mailOptions = {
-            from: `Best shop in da world! <${process.env.ACCOUNT_NAME}>`,
-            to: email,
-            subject: 'You have succesfully signed up!',
-            html:
-              '<h1> Welcome to our shop!</h1> <br/> <h2> You have succeed in creating an account! </h2>',
-          };
+  // If errors array is not empty
+  if (!errors.isEmpty()) {
+    // Error status code which indicates that validation failed
+    return res.status(422).render('auth/signup', {
+      path: '/signup',
+      pageTitle: 'Signup',
+      errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email,
+        password,
+        confirmPassword: req.body.confirmPassword,
+      },
+      validationErrors: errors.array(),
+    });
+  }
 
-          transporter.sendMail(mailOptions);
-        });
+  // Second argument is salt - number of hash rounds, more rounds - more secure but take more time
+  // This action is not inversible, you cannot deencrypt it.
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      const user = new User({
+        email,
+        password: hashedPassword,
+        cart: { items: [] },
+      });
+      return user.save();
     })
+    .then((result) => {
+      res.redirect('/login');
+      const mailOptions = {
+        from: `Best shop in da world! <${process.env.ACCOUNT_NAME}>`,
+        to: email,
+        subject: 'You have succesfully signed up!',
+        html:
+          '<h1> Welcome to our shop!</h1> <br/> <h2> You have succeed in creating an account! </h2>',
+      };
 
+      transporter.sendMail(mailOptions);
+    })
     .catch((err) => console.log(err));
 };
 
