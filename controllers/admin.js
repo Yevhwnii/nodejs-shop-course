@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator/check');
 
 const Product = require('../models/product');
+const user = require('../models/user');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -23,7 +24,7 @@ exports.postAddProduct = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
-      path: '/admin/edit-product',
+      path: '/admin/add-product',
       editing: false,
       hasError: true,
       product: {
@@ -51,7 +52,11 @@ exports.postAddProduct = (req, res, next) => {
     .then((result) => {
       res.redirect('/admin/products');
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -61,20 +66,26 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  Product.findById(prodId).then((product) => {
-    if (!product) {
-      return res.redirect('/');
-    }
-    res.render('admin/edit-product', {
-      pageTitle: 'Edit product',
-      path: '/admin/edit-product',
-      editing: editMode,
-      product: product,
-      hasError: false,
-      errorMessage: null,
-      validationErrors: [],
+  Product.findById(prodId)
+    .then((product) => {
+      if (!product) {
+        return res.redirect('/');
+      }
+      res.render('admin/edit-product', {
+        pageTitle: 'Edit product',
+        path: '/admin/edit-product',
+        editing: editMode,
+        product: product,
+        hasError: false,
+        errorMessage: null,
+        validationErrors: [],
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
-  });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -118,7 +129,11 @@ exports.postEditProduct = (req, res, next) => {
         res.redirect('/admin/products');
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getProducts = (req, res, next) => {
@@ -127,7 +142,7 @@ exports.getProducts = (req, res, next) => {
     .populate('userId', 'name') - instead of userId there will be object form db, from which we can select name for example
     It doesn`t return a promise, for it to return a promise we need to call execPopulate()
    */
-  Product.find()
+  Product.find({ userId: req.user._id })
     .then((products) => {
       res.render('admin/products', {
         prods: products,
@@ -135,7 +150,11 @@ exports.getProducts = (req, res, next) => {
         path: '/admin/products',
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -144,5 +163,9 @@ exports.postDeleteProduct = (req, res, next) => {
     .then(() => {
       res.redirect('/admin/products');
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
