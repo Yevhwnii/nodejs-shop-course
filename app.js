@@ -60,6 +60,9 @@ app.use(
 );
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+// Saying to express to make this folder static, so any request to /images will use
+// that folder
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(
   session({
     secret: process.env.SECRET_KEY,
