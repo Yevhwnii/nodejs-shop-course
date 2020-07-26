@@ -74,7 +74,7 @@ app.use(
 );
 
 // For any non-GET request this package will look for the existance of csrf token
-// in request body.
+// in request body, query params or headers.
 // We pass this token to the views, and from there, we add to all forms, input with name _csrf and value of this token
 // it will be checked behind the scenes and compared.
 // This middleware assigns csrf variable to request and pass it forward
