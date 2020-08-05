@@ -48,6 +48,7 @@ data/
 images/
 server.cert
 server.key
+Procfile
 
 # TypeScript v1 declaration files
 typings/
