@@ -3,6 +3,7 @@ require('dotenv').config();
 // 3-rd party imports
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -27,6 +28,8 @@ const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
   collection: 'sessions',
 });
+const privateKey = fs.readFileSync('server.key');
+const certificate = fs.readFileSync('server.cert');
 const csrfProtection = csrf();
 // View engine
 app.set('view engine', 'ejs');
@@ -151,7 +154,15 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then((result) => {
     console.log('MongoDB is connected!');
-    app.listen(3000);
+    // https
+    //   .createServer(
+    //     {
+    //       key: privateKey,
+    //       cert: certificate,
+    //     },
+    //   app
+    // )
+    app.listen(process.env.PORT || 3000);
     console.log('Server is running on 3000 port');
   })
   .catch((err) => console.log(err));
