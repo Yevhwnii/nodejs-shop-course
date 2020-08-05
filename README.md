@@ -1,8 +1,8 @@
 # nodejs-shop-course
 NodeJs web applicaiton which was developed during take of course from Udemy.com.
-Step by step I developed this application along with instructor and it shows my skills acquired during learning process.
-Rest API part of the course: 
-GraphQL part of the course: 
+Step by step I developed this application along with instructor and it shows my skills acquired during learning process. \n
+Rest API part of the course: https://github.com/Yevhwnii/nodejs-restapi-course
+GraphQL part of the course: https://github.com/Yevhwnii/nodejs-graphql-course
 
 Overall skills achieved:
 1. Explored core features and concepts of NodeJS framework, what NodeJS essentially is and how to create simple server on it
