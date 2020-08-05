@@ -10,6 +10,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+const helmet = require('helmet');
 // Local imports
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -53,6 +54,9 @@ const fileFilter = (req, file, cb) => {
     cb(null, false);
   }
 };
+
+// Secure HTTP headers in responses
+app.use(helmet());
 
 // Package middlewares
 app.use(
