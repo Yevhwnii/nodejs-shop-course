@@ -46,6 +46,8 @@ node_modules/
 jspm_packages/
 data/
 images/
+server.cert
+server.key
 
 # TypeScript v1 declaration files
 typings/
