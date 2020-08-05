@@ -11,6 +11,7 @@ const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
 const helmet = require('helmet');
+const compression = require('compression');
 // Local imports
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -57,6 +58,8 @@ const fileFilter = (req, file, cb) => {
 
 // Secure HTTP headers in responses
 app.use(helmet());
+// Compressing assets
+app.use(compression());
 
 // Package middlewares
 app.use(
