@@ -2,6 +2,8 @@
 NodeJs web applicaiton which was developed during take of course from Udemy.com.
 Step by step I developed this application along with instructor and it shows my skills acquired during learning process. 
 
+Course itself: https://www.udemy.com/course/nodejs-the-complete-guide/
+
 Rest API part of the course: https://github.com/Yevhwnii/nodejs-restapi-course
 
 GraphQL part of the course: https://github.com/Yevhwnii/nodejs-graphql-course
